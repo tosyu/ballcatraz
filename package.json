@@ -1,0 +1,55 @@
+{
+  "name": "ballcatraz",
+  "version": "1.0.0",
+  "description": "Brakeout clone",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf .\\build",
+    "webpack": "webpack --display-error-details --progress --color --display-chunks --display-entrypoints --profile",
+    "webpack-dev": "npm run webpack -- --config .\\config\\webpack.config.js --mode development",
+    "webpack-prod": "npm run webpack -- --config .\\config\\webpack.config.js --mode production",
+    "webpack-dev-watch": "npm run webpack-dev -- --watch",
+    "build-prod": "npm run clean && npm run webpack-dev",
+    "build-dev": "npm run clean && npm run webpack-dev",
+    "build-dev-watch": "npm run clean && npm run webpack-dev-watch",
+    "serve": "npm run clean && webpack-dev-server --config .\\config\\webpack.config.js --mode development",
+    "build": "npm run build-prod",
+    "test": "exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/bytehog/ballcatraz.git"
+  },
+  "keywords": [
+    "breakeout",
+    "classics",
+    "arcade",
+    "game",
+    "phaser"
+  ],
+  "author": "BYTEHOG.pl",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bytehog/ballcatraz/issues"
+  },
+  "homepage": "https://github.com/bytehog/ballcatraz#readme",
+  "dependencies": {
+    "css-loader": "^2.1.0",
+    "expose-loader": "^0.7.5",
+    "file-loader": "^3.0.1",
+    "html-webpack-plugin": "^3.2.0",
+    "node-sass": "^4.11.0",
+    "phaser-ce": "^2.11.1",
+    "rimraf": "^2.6.3",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.3.3",
+    "tslint": "^5.12.1",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-loader": "^3.5.4",
+    "typescript": "^3.2.4",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  }
+}

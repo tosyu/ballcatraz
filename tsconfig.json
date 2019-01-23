@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/app",
+        "noImplicitAny": true,
+        "module": "es6",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "./node_modules/phaser-ce/typescript/*.ts"
+    ]
+}
