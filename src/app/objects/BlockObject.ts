@@ -8,4 +8,9 @@ export class BlockObject extends Phaser.Graphics {
     this.lineStyle(1, 0);
     this.drawRect(0, 0, 32, 10);
   }
+
+  destroy() {
+    this.parent.removeChild(this);
+    super.destroy();
+  }
 }

@@ -45,6 +45,10 @@ export class GameState extends Phaser.State {
 
   update() {
     this.physics.arcade.collide(this.ball, this.paddle);
-    this.physics.arcade.collide(this.ball, this.blocks);
+    this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollide);
+  }
+
+  onBallCollide(ball: BallObject, block: BlockObject) {
+    block.destroy();
   }
 }
