@@ -39,7 +39,7 @@ export class GameState extends Phaser.State {
 
     const ballBody = (this.ball.body as Phaser.Physics.Arcade.Body);
     ballBody.collideWorldBounds = true;
-    ballBody.velocity.set(centerX + 5, this.game.height);
+    ballBody.velocity.set(centerX + 5, this.game.height / 2);
     ballBody.bounce.set(1);
   }
 
