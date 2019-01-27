@@ -4,37 +4,21 @@ import 'phaser';
 
 import '../sass/main.scss';
 
+import { BootState, GameState } from './states';
+
 const WIDTH = 320;
-const HEIGHT = WIDTH * 0.75;
+const HEIGHT = 240;
 
 class Ballcatraz{
   game: Phaser.Game;
 
   constructor() {
-    this.game = new Phaser.Game(
-      320,
-      240,
-      Phaser.AUTO,
-      '', {
-        preload: () => this.preload(),
-        create: () => this.create(),
-        update: () => this.update(),
-      },
-    );
-  }
+    this.game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO);
 
-  preload() {
-    console.log('preload');
-  }
+    this.game.state.add('boot', new BootState());
+    this.game.state.add('game', new GameState());
 
-  create() {
-    console.log('create');
-    this.game.canvas.setAttribute('width', `${WIDTH}`);
-    this.game.canvas.setAttribute('height', `${HEIGHT}`);
-  }
-
-  update() {
-    // console.log('update');
+    this.game.state.start('boot');
   }
 }
 

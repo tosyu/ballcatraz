@@ -7,13 +7,13 @@ body {
   height: 100vh;
   overflow: hidden;
   display: block;
+  background-color: #000;
 
   canvas {
     display: block;
     position: fixed;
     left: 0;
     top: 0;
-    width: $width !important;
-    height: calc(#{$width} * 0.75) !important;
+    box-shadow: 0px 0px 32px #a0a0a0;
   }
 }
