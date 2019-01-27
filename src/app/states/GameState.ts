@@ -1,5 +1,7 @@
 import 'phaser';
 
+import { BlockObject, PaddleObject, BallObject } from '../objects';
+
 export class GameState extends Phaser.State {
 
   blocks: Phaser.Group;
@@ -9,32 +11,40 @@ export class GameState extends Phaser.State {
   preload() {}
 
   create() {
+    this.physics.startSystem(Phaser.Physics.ARCADE);
+
     this.blocks = this.game.add.group();
+    this.blocks.enableBody = true;
+    this.blocks.physicsBodyType = Phaser.Physics.ARCADE;
     for (let i = 0; i < 10; i += 1) {
       for (let j = 0; j < 32; j += 1) {
-        const block = this.game.add.graphics(j * 32, i * 10);
+        const block = new BlockObject(this.game, j * 32, i * 10);
 
-        block.beginFill(0xff0000);
-        block.lineStyle(1, 0);
-        block.drawRect(0, 0, 32, 10);
+        this.physics.enable(block);
+        (block.body as Phaser.Physics.Arcade.Body).immovable = true;
 
         this.blocks.add(block);
       }
     }
+    this.world.add(this.blocks);
 
     const centerX = this.game.width / 2;
 
-    this.paddle = this.game.add.graphics(centerX - 16, this.game.height - 32);
-    this.paddle.beginFill(0x0000ff);
-    this.paddle.drawRect(0, 0, 32, 10);
+    this.paddle = this.world.add(new PaddleObject(this.game, centerX - 16, this.game.height - 32));
+    this.physics.enable(this.paddle);
+    this.paddle.body.immovable = true;
 
-    this.ball = this.game.add.graphics(centerX, this.game.height - 40);
-    this.ball.beginFill(0x00ff00);
-    this.ball.drawCircle(0, 0, 5);
+    this.ball = this.world.add(new BallObject(this.game, centerX, this.game.height - 40));
+    this.physics.enable(this.ball);
+
+    const ballBody = (this.ball.body as Phaser.Physics.Arcade.Body);
+    ballBody.collideWorldBounds = true;
+    ballBody.velocity.set(centerX + 5, this.game.height);
+    ballBody.bounce.set(1);
   }
 
   update() {
-    this.input.position.clampX(0, this.game.width - this.paddle.width);
-    this.paddle.position.x = this.input.position.x;
+    this.physics.arcade.collide(this.ball, this.paddle);
+    this.physics.arcade.collide(this.ball, this.blocks);
   }
 }
