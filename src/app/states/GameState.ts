@@ -8,22 +8,41 @@ export class GameState extends Phaser.State {
   paddle: Phaser.Graphics;
   ball: Phaser.Graphics;
 
-  preload() {}
+  levelName: string;
+
+  init(levelName: string) {
+    this.levelName = levelName;
+    this.load.onLoadStart.add(() => console.log('loading'));
+    this.load.onLoadComplete.add(() => console.log('loaded'));
+  }
+
+  preload() {
+    this.load.text(this.levelName, ['/assets/maps', `${this.levelName}.map`].join('/'));
+  }
 
   create() {
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
+    const map: number[] = this.cache.getText(this.levelName)
+      .replace(/[^0-9]+/gi, '')
+      .split('')
+      .map(c => parseFloat(c.trim()));
+
     this.blocks = this.game.add.group();
     this.blocks.enableBody = true;
     this.blocks.physicsBodyType = Phaser.Physics.ARCADE;
+    let c = 0;
     for (let i = 0; i < 10; i += 1) {
-      for (let j = 0; j < 32; j += 1) {
-        const block = new BlockObject(this.game, j * 32, i * 10);
+      for (let j = 0; j < 10; j += 1) {
+        if (map[c] > 0) {
+          const block = new BlockObject(this.game, j * 32, i * 10);
 
-        this.physics.enable(block);
-        (block.body as Phaser.Physics.Arcade.Body).immovable = true;
+          this.physics.enable(block);
+          (block.body as Phaser.Physics.Arcade.Body).immovable = true;
 
-        this.blocks.add(block);
+          this.blocks.add(block);
+        }
+        c += 1;
       }
     }
     this.world.add(this.blocks);
@@ -41,6 +60,10 @@ export class GameState extends Phaser.State {
     ballBody.collideWorldBounds = true;
     ballBody.velocity.set(centerX + 5, this.game.height / 2);
     ballBody.bounce.set(1);
+  }
+
+  start() {
+
   }
 
   update() {

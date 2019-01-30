@@ -12,6 +12,6 @@ export class BootState extends Phaser.State {
     // }
   }
   update() {
-    this.state.start('game');
+    this.state.start('game', true, true, '00-test');
   }
 }

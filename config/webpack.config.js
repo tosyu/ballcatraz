@@ -1,11 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+function fromRoot() {
+    const args = [].slice.call(arguments);
+    return path.join.apply(path, ([__dirname, '..', ].concat(args)));
+}
 
 module.exports = (env, opts) => {
     const config = {
         entry: {
-            app: path.resolve(__dirname, '../src/app/main.ts'),
+            app: fromRoot('src/app/main.ts'),
         },
         mode: opts.mode || 'development',
         module: {
@@ -20,17 +26,17 @@ module.exports = (env, opts) => {
             ]
         },
         resolve: {
-            extensions: ['.ts', '.js'],
+            extensions: ['.ts', '.js', 'map'],
             alias: {
-                pixi: path.join(__dirname, '../node_modules/phaser-ce/build/custom/pixi.js'),
-                phaser: path.join(__dirname, '../node_modules/phaser-ce/build/custom/phaser-split.js'),
-                p2: path.join(__dirname, '../node_modules/phaser-ce/build/custom/p2.js'),
-                assets: path.join(__dirname, '../assets/')
+                pixi: fromRoot('node_modules/phaser-ce/build/custom/pixi.js'),
+                phaser: fromRoot('node_modules/phaser-ce/build/custom/phaser-split.js'),
+                p2: fromRoot('node_modules/phaser-ce/build/custom/p2.js'),
+                assets: fromRoot('build/app/assets'),
             }
         },
         output: {
-            filename: '[name].[contentHash].js',
-            path: path.resolve(__dirname, '../build/app')
+            filename: '[name].js',
+            path: fromRoot('build/app'),
         },
         optimization: {},
         plugins: []
@@ -40,8 +46,12 @@ module.exports = (env, opts) => {
         config.devtool = 'inline-source-map';
 
         if (opts.serve) {
+            console.log('enabling webserver');
             config.devServer = {
-                contentBase: path.resolve(__dirname, '../build'),
+                contentBase: [
+                    fromRoot('build/app'),
+                    fromRoot('build/app/assets')
+                ],
                 compress: true,
                 port: 9000
             }
@@ -51,6 +61,12 @@ module.exports = (env, opts) => {
     }
 
     config.plugins.push(new HtmlWebpackPlugin());
+    config.plugins.push(new CopyWebpackPlugin(
+        [
+            {from: 'assets/**/*', context: fromRoot('src')}
+        ],
+        {}
+    ));
 
     return config;
 };
