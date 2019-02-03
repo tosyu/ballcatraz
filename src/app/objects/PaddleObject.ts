@@ -26,7 +26,7 @@ export class PaddleObject extends Phaser.Graphics {
   mouseMove(pointer: Phaser.Pointer, x: number, y: number) {
     if (!this.game.paused) {
       this.position.x = x;
-      this.position.clampX(0, this.game.width);
+      this.position.clampX(0, this.game.width - this.width);
     }
   }
 }
