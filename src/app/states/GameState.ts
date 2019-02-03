@@ -1,6 +1,7 @@
 import 'phaser';
 
-import { BlockObject, PaddleObject, BallObject } from '../objects';
+import { createBlock, PaddleObject, BallObject, IBlockObject } from '../objects';
+import { Physics } from 'phaser-ce';
 
 export class GameState extends Phaser.State {
 
@@ -35,7 +36,7 @@ export class GameState extends Phaser.State {
     for (let i = 0; i < 10; i += 1) {
       for (let j = 0; j < 10; j += 1) {
         if (map[c] > 0) {
-          const block = new BlockObject(this.game, j * 32, i * 10);
+          const block = createBlock(map[c], this.game, j * 32, i * 10);
 
           this.physics.enable(block);
           (block.body as Phaser.Physics.Arcade.Body).immovable = true;
@@ -71,7 +72,10 @@ export class GameState extends Phaser.State {
     this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollide);
   }
 
-  onBallCollide(ball: BallObject, block: BlockObject) {
-    block.destroy();
+  onBallCollide(ball: BallObject, block: IBlockObject) {
+    block.hit();
+    if (block.isDead()) {
+      block.destroy();
+    }
   }
 }
