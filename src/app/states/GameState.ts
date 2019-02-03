@@ -3,6 +3,15 @@ import 'phaser';
 import { createBlock, PaddleObject, BallObject, IBlockObject } from '../objects';
 import { Physics } from 'phaser-ce';
 
+const pow = Math.pow;
+const max = Math.max;
+const min = Math.min;
+const abs = Math.abs;
+
+function clamp(v: number, vmin: number, vmax: number): number {
+  return min(vmax, max(vmin, v));
+}
+
 export class GameState extends Phaser.State {
 
   blocks: Phaser.Group;
@@ -58,21 +67,39 @@ export class GameState extends Phaser.State {
     this.physics.enable(this.ball);
 
     const ballBody = (this.ball.body as Phaser.Physics.Arcade.Body);
+    const ballWidth = this.ball.width;
+    ballBody.setCircle(ballWidth / 2, -(ballWidth / 2), -(ballWidth / 2));
     ballBody.collideWorldBounds = true;
-    ballBody.velocity.set(centerX + 5, this.game.height / 2);
+    ballBody.velocity.set(100, 100);
     ballBody.bounce.set(1);
   }
 
-  start() {
-
+  render() {
+    this.game.debug.body(this.ball);
+    this.game.debug.body(this.paddle);
   }
 
   update() {
-    this.physics.arcade.collide(this.ball, this.paddle);
-    this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollide);
+    this.physics.arcade.collide(this.ball, this.paddle, this.onBallCollidWithPaddle);
+    this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollideWithBlock);
   }
 
-  onBallCollide(ball: BallObject, block: IBlockObject) {
+  onBallCollidWithPaddle(ball: BallObject, paddle: PaddleObject) {
+    // this efectively modifies the direction of the bounce so that is a little more
+    // to the side as it approaches the end of the paddle, gives the user more control
+    const diff = paddle.centerX + 2 - ball.centerX;
+    const amount = (abs(diff) / (paddle.width / 2)) / 0.8;
+    const ease = pow(clamp(amount, 0, 1), 2);
+    const force = (diff > 0 ? -1 : 1) * ease;
+
+    const velocity = ball.body.velocity;
+    const magnitude = velocity.getMagnitude();
+
+    velocity.normalize().add(force, 0);
+    velocity.setMagnitude(magnitude);
+  }
+
+  onBallCollideWithBlock(ball: BallObject, block: IBlockObject) {
     block.hit();
     if (block.isDead()) {
       block.destroy();
