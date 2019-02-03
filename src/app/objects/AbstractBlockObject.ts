@@ -16,7 +16,9 @@ export abstract class AbstractBlockObject
   }
 
   destroy() {
-    this.parent.removeChild(this);
+    if (this.parent) {
+      this.parent.removeChild(this);
+    }
     super.destroy();
   }
 }

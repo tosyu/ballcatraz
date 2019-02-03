@@ -12,6 +12,8 @@ function clamp(v: number, vmin: number, vmax: number): number {
   return min(vmax, max(vmin, v));
 }
 
+const DEFAULT_BALL_SPEED = 100;
+
 export class GameState extends Phaser.State {
 
   blocks: Phaser.Group;
@@ -69,9 +71,14 @@ export class GameState extends Phaser.State {
     const ballBody = (this.ball.body as Phaser.Physics.Arcade.Body);
     const ballWidth = this.ball.width;
     ballBody.setCircle(ballWidth / 2, -(ballWidth / 2), -(ballWidth / 2));
+    ballBody.allowRotation = false;
     ballBody.collideWorldBounds = true;
-    ballBody.velocity.set(100, 100);
+    ballBody.velocity.set(1, 1);
+    ballBody.velocity.setMagnitude(100);
     ballBody.bounce.set(1);
+
+    ballBody.onWorldBounds = new Phaser.Signal();
+    ballBody.onWorldBounds.add(this.onBallCollideWithBounds, this);
   }
 
   render() {
@@ -80,11 +87,17 @@ export class GameState extends Phaser.State {
   }
 
   update() {
-    this.physics.arcade.collide(this.ball, this.paddle, this.onBallCollidWithPaddle);
-    this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollideWithBlock);
+    this.physics.arcade.collide(this.ball, this.paddle, this.onBallCollideWithPaddle, null, this);
+    this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollideWithBlock, null, this);
   }
 
-  onBallCollidWithPaddle(ball: BallObject, paddle: PaddleObject) {
+  private onBallCollideWithBounds(ball: BallObject, up: boolean, down: boolean) {
+    if (down) {
+      this.state.start('game', true, true, this.levelName);
+    }
+  }
+
+  private onBallCollideWithPaddle(ball: BallObject, paddle: PaddleObject) {
     // this efectively modifies the direction of the bounce so that is a little more
     // to the side as it approaches the end of the paddle, gives the user more control
     const diff = paddle.centerX + 2 - ball.centerX;
@@ -96,13 +109,18 @@ export class GameState extends Phaser.State {
     const magnitude = velocity.getMagnitude();
 
     velocity.normalize().add(force, 0);
-    velocity.setMagnitude(magnitude);
+    this.resetBallSpeed();
   }
 
-  onBallCollideWithBlock(ball: BallObject, block: IBlockObject) {
+  private onBallCollideWithBlock(ball: BallObject, block: IBlockObject) {
+    this.resetBallSpeed();
     block.hit();
     if (block.isDead()) {
       block.destroy();
     }
+  }
+
+  private resetBallSpeed(speed: number = DEFAULT_BALL_SPEED) {
+    this.ball.body.velocity.setMagnitude(DEFAULT_BALL_SPEED);
   }
 }
