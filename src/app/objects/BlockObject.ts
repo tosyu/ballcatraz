@@ -24,3 +24,18 @@ export function createBlock(type: BlockTypes, game: Phaser.Game, x: number, y: n
       return new SteelBlockObject(game, x, y);
   }
 }
+
+export function getObjectType(obj: IBlockObject): BlockTypes {
+  switch (true) {
+    case obj instanceof NormalBlockObject:
+      return BlockTypes.NORMAL;
+    case obj instanceof GlassBlockObject:
+      return BlockTypes.GLASS;
+    case obj instanceof WoodBlockObject:
+      return BlockTypes.WOOD;
+    case obj instanceof ConcreteBlockObject:
+      return BlockTypes.CONCRETE;
+    case obj instanceof SteelBlockObject:
+      return BlockTypes.STEEL;
+  }
+}

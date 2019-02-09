@@ -12,7 +12,11 @@ export class SteelBlockObject extends AbstractBlockObject {
     this.drawRect(0, 0, 32, 10);
   }
 
-  hit(what?: Phaser.Physics.Arcade.Body) {}
+  hit(what?: Phaser.Physics.Arcade.Body) { }
+
+  isKillable(): boolean {
+    return false;
+  }
 
   isDead() {
     return false;

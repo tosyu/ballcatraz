@@ -1,7 +1,6 @@
 import 'phaser';
 
-import { createBlock, PaddleObject, BallObject, IBlockObject } from '../objects';
-import { Physics } from 'phaser-ce';
+import { createBlock, PaddleObject, BallObject, IBlockObject, getObjectType, BlockTypes } from '../objects';
 
 const pow = Math.pow;
 const max = Math.max;
@@ -20,6 +19,11 @@ export class GameState extends Phaser.State {
   paddle: Phaser.Graphics;
   ball: Phaser.Graphics;
 
+  points: number;
+
+  pointsTx: Phaser.BitmapText;
+  timeTx: Phaser.BitmapText;
+
   levelName: string;
 
   init(levelName: string) {
@@ -29,6 +33,7 @@ export class GameState extends Phaser.State {
   }
 
   preload() {
+    this.load.bitmapFont('dejavu', '/assets/fonts/dejavu.png', '/assets/fonts/dejavu.xml');
     this.load.text(this.levelName, ['/assets/maps', `${this.levelName}.map`].join('/'));
   }
 
@@ -79,6 +84,9 @@ export class GameState extends Phaser.State {
 
     ballBody.onWorldBounds = new Phaser.Signal();
     ballBody.onWorldBounds.add(this.onBallCollideWithBounds, this);
+
+    this.points = 0;
+    this.pointsTx = this.add.bitmapText(0, 0, 'dejavu', `Points: ${this.points}`, 10);
   }
 
   render() {
@@ -89,6 +97,8 @@ export class GameState extends Phaser.State {
   update() {
     this.physics.arcade.collide(this.ball, this.paddle, this.onBallCollideWithPaddle, null, this);
     this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollideWithBlock, null, this);
+
+    this.pointsTx.setText(`Points: ${this.points}`);
   }
 
   private onBallCollideWithBounds(ball: BallObject, up: boolean, down: boolean) {
@@ -115,9 +125,26 @@ export class GameState extends Phaser.State {
   private onBallCollideWithBlock(ball: BallObject, block: IBlockObject) {
     this.resetBallSpeed();
     block.hit();
-    if (block.isDead()) {
+
+    let hitPoints = 5;
+
+    if (block.isKillable() && block.isDead()) {
       block.destroy();
+
+      switch (getObjectType(block)) {
+        case BlockTypes.NORMAL:
+          hitPoints += 10;
+          break;
+        case BlockTypes.WOOD:
+          hitPoints += 25;
+          break;
+        case BlockTypes.GLASS:
+          hitPoints += 50;
+          break;
+      }
     }
+
+    this.points += hitPoints;
   }
 
   private resetBallSpeed(speed: number = DEFAULT_BALL_SPEED) {

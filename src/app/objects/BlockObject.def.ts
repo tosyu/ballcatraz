@@ -1,3 +1,4 @@
+
 export enum BlockTypes {
   NORMAL = 1,
   GLASS = 2,
@@ -10,4 +11,5 @@ export interface IBlockObject extends Phaser.Graphics {
   hit(what?: Phaser.Physics.Arcade.Body): void;
   isDead(): boolean;
   destroy(): any;
+  isKillable(): boolean;
 }

@@ -11,6 +11,10 @@ export abstract class AbstractBlockObject
     this.lifePoints -= 1;
   }
 
+  isKillable(): boolean {
+    return true;
+  }
+
   isDead(): boolean {
     return this.lifePoints <= 0;
   }
