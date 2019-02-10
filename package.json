@@ -52,5 +52,8 @@
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
+  },
+  "dependencies": {
+    "typescript-tslint-plugin": "^0.3.1"
   }
 }

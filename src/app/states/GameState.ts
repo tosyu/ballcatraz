@@ -1,6 +1,8 @@
 import 'phaser';
 
-import { createBlock, PaddleObject, BallObject, IBlockObject, getObjectType, BlockTypes } from '../objects';
+import {
+  createBlock, PaddleObject, BallObject, IBlockObject, getObjectType,
+  BlockTypes } from '../objects';
 
 const pow = Math.pow;
 const max = Math.max;
@@ -16,15 +18,18 @@ const DEFAULT_BALL_SPEED = 100;
 export class GameState extends Phaser.State {
 
   blocks: Phaser.Group;
-  paddle: Phaser.Graphics;
-  ball: Phaser.Graphics;
+  paddle: PaddleObject;
+  ball: BallObject;
 
   points: number;
 
   pointsTx: Phaser.BitmapText;
   timeTx: Phaser.BitmapText;
+  pauseTx: Phaser.BitmapText;
+  startTx: Phaser.BitmapText;
 
   levelName: string;
+  gameStarted: boolean;
 
   init(levelName: string) {
     this.levelName = levelName;
@@ -38,6 +43,8 @@ export class GameState extends Phaser.State {
   }
 
   create() {
+    this.gameStarted = false;
+    this.game.paused = true;
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
     const map: number[] = this.cache.getText(this.levelName)
@@ -65,6 +72,7 @@ export class GameState extends Phaser.State {
     this.world.add(this.blocks);
 
     const centerX = this.game.width / 2;
+    const centerY = this.game.height / 2;
 
     this.paddle = this.world.add(new PaddleObject(this.game, centerX - 16, this.game.height - 32));
     this.physics.enable(this.paddle);
@@ -87,6 +95,25 @@ export class GameState extends Phaser.State {
 
     this.points = 0;
     this.pointsTx = this.add.bitmapText(0, 0, 'dejavu', `Points: ${this.points}`, 10);
+
+    this.pauseTx = this.add.bitmapText(centerX - 25, centerY - 5, 'dejavu', 'Game Paused', 10);
+    this.pauseTx.visible = false;
+
+    let startTxVal = 'Press S to start';
+    let startTxX = centerX - 35;
+    if (!this.game.device.desktop) {
+      startTxVal = 'Click anywhere to start';
+      startTxX = centerX - 50;
+    }
+    this.startTx = this.add.bitmapText(startTxX, centerY - 5, 'dejavu', startTxVal, 10);
+
+    this.input.keyboard.addCallbacks(this, this.onKeyDown);
+    this.input.onUp.add(this.onUp, this);
+  }
+
+  shutdown() {
+    this.input.keyboard.removeCallbacks();
+    this.input.onUp.remove(this.onUp, this);
   }
 
   render() {
@@ -99,11 +126,46 @@ export class GameState extends Phaser.State {
     this.physics.arcade.collide(this.ball, this.blocks, this.onBallCollideWithBlock, null, this);
 
     this.pointsTx.setText(`Points: ${this.points}`);
+
+    if (this.pauseTx.visible) {
+      this.pauseTx.visible = false;
+    }
   }
 
   private onBallCollideWithBounds(ball: BallObject, up: boolean, down: boolean) {
     if (down) {
       this.state.start('game', true, true, this.levelName);
+    }
+  }
+
+  pauseUpdate() {
+    if (this.gameStarted) {
+      this.pauseTx.visible = true;
+    }
+  }
+
+  private onUp(poibter: Phaser.Pointer) {
+    if (!this.game.device.desktop) {
+      if (!this.gameStarted) {
+        this.gameStarted = true;
+        this.game.paused = this.startTx.visible = false;
+      } else if (!this.paddle.isDragging()) {
+        this.pauseTx.visible = this.game.paused = !this.game.paused;
+      }
+    }
+  }
+
+  private onKeyDown(event: KeyboardEvent) {
+    switch (event.which) {
+      case Phaser.KeyCode.S:
+        if (!this.gameStarted) {
+          this.gameStarted = true;
+          this.game.paused = this.startTx.visible = false;
+        }
+        break;
+      case Phaser.KeyCode.P:
+        this.pauseTx.visible = this.game.paused = !this.game.paused;
+        break;
     }
   }
 
